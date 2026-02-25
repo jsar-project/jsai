@@ -22,12 +22,6 @@ jobs:
       - name: Checkout current repo
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-
       - name: Checkout upstream repo
         uses: actions/checkout@v4
         with:
@@ -35,6 +29,13 @@ jobs:
           token: ${{ secrets.INK_REPO_TOKEN }}
           path: ink
           persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: ink/docs/package-lock.json
 
       - name: Install dependencies
         working-directory: ink/docs
