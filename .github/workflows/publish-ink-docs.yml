@@ -1,0 +1,61 @@
+name: Publish Ink Docs to GH Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Checkout upstream repo
+        uses: actions/checkout@v4
+        with:
+          repository: jsar-project/ink
+          token: ${{ secrets.INK_REPO_TOKEN }}
+          path: ink
+          persist-credentials: false
+
+      - name: Install dependencies
+        working-directory: ink/docs
+        run: npm ci
+
+      - name: Build docs
+        working-directory: ink/docs
+        run: npm run docs:build
+
+      - name: Set artifact path
+        run: echo "ARTIFACT_PATH=ink/docs/.vitepress/dist" >> $GITHUB_ENV
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.ARTIFACT_PATH }}
+
+      - name: Deploy to Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
