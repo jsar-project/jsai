@@ -14,7 +14,7 @@
           },
           {
             "id": "quickstart",
-            "label": "AIUI 快速入门"
+            "label": "快速入门"
           },
           {
             "id": "first-chat",
@@ -938,6 +938,11 @@
       {
         "id": "overview",
         "label": "能力概览",
+        "children": []
+      },
+      {
+        "id": "account-information",
+        "label": "AIUI 账号信息授权与校验",
         "children": []
       },
       {

@@ -14,7 +14,7 @@
           },
           {
             "id": "quickstart",
-            "label": "AIUI Quick Start"
+            "label": "Quick Start"
           },
           {
             "id": "first-chat",
@@ -758,6 +758,11 @@
       {
         "id": "overview",
         "label": "Overview",
+        "children": []
+      },
+      {
+        "id": "account-information",
+        "label": "Account Information",
         "children": []
       },
       {
