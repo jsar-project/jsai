@@ -941,7 +941,7 @@
         "children": []
       },
       {
-        "id": "account-information",
+        "id": "authorization",
         "label": "AIUI 账号信息授权与校验",
         "children": []
       },
