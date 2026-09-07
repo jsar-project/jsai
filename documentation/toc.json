@@ -942,7 +942,7 @@
       },
       {
         "id": "authorization",
-        "label": "AIUI 账号信息授权与校验",
+        "label": "账号授权",
         "children": []
       },
       {
