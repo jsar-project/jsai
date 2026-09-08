@@ -32,7 +32,9 @@ const response = await cloud.sendNotification({
 console.log(response.data.success)
 ```
 
-`sendNotification()` 在服务端返回 `code === 1` 且 `data.success === true` 时返回完整响应。参数错误会抛出 `CloudIntegrationValidationError`；网络、HTTP、响应解析和业务错误会抛出 `CloudIntegrationError`。
+`@yodaos-pkg/cloud-integration` 需要 Node.js 20 或以上版本。构造函数还支持可选的 `endpoint`（覆盖默认接口地址）和 `fetch`（为测试或自定义运行时提供 Fetch 实现）。
+
+`sendNotification()` 在服务端返回 `code === 1` 且 `data.success === true` 时返回完整响应。参数错误会抛出 `CloudIntegrationValidationError`；网络、HTTP、响应解析和业务错误会抛出 `CloudIntegrationError`。仅对明确可恢复的网络或服务端临时错误重试，同一次通知尝试应复用相同的 `messageId`；参数校验失败不应重试，投递结果未知时也不要无限重试。
 
 ## 使用 HTTP 或 curl
 

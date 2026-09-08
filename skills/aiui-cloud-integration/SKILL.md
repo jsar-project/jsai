@@ -1,25 +1,72 @@
 ---
 name: "aiui-cloud-integration"
-description: "Integrate third-party AIUI agents with Rokid Glasses cloud notifications through @yodaos-pkg/cloud-integration or direct HTTP/curl requests. Invoke when implementing notification delivery, notification-triggered page navigation, or related agent configuration."
+description: "Use when implementing server-side AIUI cloud integrations for account token lookup, temporary AIUI message caching, Rokid Glasses notification delivery, or notification-triggered page navigation."
 ---
 
 # AIUI Cloud Integration
 
-Use this skill when an AIUI agent needs to send a notification to a Rokid
-Glasses user from a server-side integration, whether through the Node.js
-package or a direct HTTP/curl request.
+Use this skill for server-side AIUI Cloud calls. Do not use these interfaces from AIUI page code. For page-side `createOpenAPI()` calls such as `getProfile`, `invokeAgentApi`, `saveThirdToken`, `getThirdToken`, or `getAIUICacheMessage`, use the `aiui-cloud-apis` skill instead.
 
-## Package
+## Choose an integration
 
-Install the zero-runtime-dependency package:
+| Need | Interface | Authentication |
+|---|---|---|
+| Get account information for an account token | `GET /account/v1/token` | `access_token` header; official platform agents only |
+| Cache one message for an account and AIUI agent | `POST /metis/openApi/v1/cacheAIUIMessage` | `access_token` header |
+| Push a notification to a Rokid Glasses user | `CloudIntegration.sendNotification()` or `POST https://rcs.rokid.com/metis/callback/message` | Rokid account SK as Bearer token |
+
+## Keep credentials server-side
+
+Treat the account `access_token` and Rokid account SK as secrets. Read them from environment variables or a secret manager. Never put them in AIUI page code, client bundles, source control, logs, request bodies, or user-visible output.
+
+## Get account information for a token
+
+`getToken` is available only to official platform agents. The current contract returns a string and does not define an internal JSON shape, so do not invent response fields.
+
+```bash
+curl --location 'https://<aiui-host>/account/v1/token' \
+  --header "access_token: ${ACCOUNT_ACCESS_TOKEN}"
+```
+
+- HTTP: `GET /account/v1/token`
+- Success: `200 application/json`, with a string response schema.
+- Invalid authentication: `401`.
+- Do not parse the response as an undocumented object.
+
+## Cache an AIUI message
+
+Use `cacheAIUIMessage` when a server needs to leave one temporary message for a specific AIUI agent. The receiving AIUI app consumes it through page-side `api.agent.getAIUICacheMessage()`.
+
+```bash
+curl --location 'https://<aiui-host>/metis/openApi/v1/cacheAIUIMessage' \
+  --header 'Content-Type: application/json' \
+  --header "access_token: ${ACCOUNT_ACCESS_TOKEN}" \
+  --data '{
+    "agentId": "7665068936018264064",
+    "path": "/pages/agent/message",
+    "customData": "custom-data",
+    "content": "You have a new agent message"
+  }'
+```
+
+All four body fields are required strings:
+
+| Field | Meaning |
+|---|---|
+| `agentId` | Target AIUI agent ID |
+| `path` | Destination AIUI page path |
+| `customData` | Application-defined string data |
+| `content` | Message content |
+
+The account comes from authentication; never send `accountId` or `access_token` in the JSON body. Entries are scoped by account ID and `agentId`, expire after 10 minutes, and a new message for the same account and agent overwrites the old message. Treat `code === 1` as success. Validate `path`, `customData`, and `content` before the receiver uses them for routing or display.
+
+## Send a Glasses notification
+
+Install the Node.js 20+ package:
 
 ```bash
 npm install @yodaos-pkg/cloud-integration
 ```
-
-Import `CloudIntegration` from the package and construct it with the Rokid
-account SK. Keep the token in an environment variable or secret manager; do
-not put it in AIUI page code, source control, logs, or user-visible data.
 
 ```js
 import { CloudIntegration } from '@yodaos-pkg/cloud-integration'
@@ -28,7 +75,7 @@ const cloud = new CloudIntegration({
   token: process.env.ROKID_SK,
 })
 
-await cloud.sendNotification({
+const response = await cloud.sendNotification({
   messageId: 'message-unique-id',
   accountId: 'target-account-id',
   message: {
@@ -38,11 +85,13 @@ await cloud.sendNotification({
 })
 ```
 
-## Direct `curl` integration
+Constructor options:
 
-When a Node.js package is not suitable, call the cloud endpoint directly with
-`curl`. Store the SK in `ROKID_SK` instead of replacing it with a literal
-secret in scripts or command history.
+- `token` is the required Rokid account SK.
+- `endpoint` optionally overrides the default endpoint.
+- `fetch` optionally supplies a custom fetch implementation.
+
+When the package is unsuitable, call the endpoint directly. SDK fields are camelCase; HTTP JSON fields are snake_case.
 
 ```bash
 curl --location 'https://rcs.rokid.com/metis/callback/message' \
@@ -58,37 +107,11 @@ curl --location 'https://rcs.rokid.com/metis/callback/message' \
   }'
 ```
 
-For page navigation, add `tool` under `message` and use the registered route
-as `name`:
+`messageId`, `accountId`, `message.agentId`, and `message.content` must be non-empty strings. Generate a unique `messageId` for tracing and deduplication.
 
-```bash
-curl --location 'https://rcs.rokid.com/metis/callback/message' \
-  --header 'Content-Type: application/json' \
-  --header "Authorization: Bearer ${ROKID_SK}" \
-  --data '{
-    "message_id": "outfit-message-id",
-    "account_id": "target-account-id",
-    "message": {
-      "agent_id": "agent-id",
-      "content": "查看穿搭建议",
-      "tool": {
-        "name": "pages/cloth/index",
-        "parameters": {
-          "type": "object",
-          "properties": {
-            "field": "value"
-          }
-        }
-      }
-    }
-  }'
-```
+## Open a page from a notification
 
-## Notification navigation
-
-To open an AIUI page when the user selects the notification, pass a `tool`
-whose `name` exactly matches a registered AIUI route. Put page input in
-`parameters.properties`; values are passed through unchanged.
+Add `tool` under `message`. Its `name` must exactly match a route registered in `app.json`. Values in `parameters.properties` pass through unchanged, so the destination page input schema must declare them.
 
 ```js
 await cloud.sendNotification({
@@ -96,37 +119,24 @@ await cloud.sendNotification({
   accountId: 'target-account-id',
   message: {
     agentId: 'agent-id',
-    content: '查看穿搭建议',
+    content: 'View outfit suggestions',
     tool: {
       name: 'pages/cloth/index',
       parameters: {
         type: 'object',
-        properties: {
-          field: 'value',
-        },
+        properties: { field: 'value' },
       },
     },
   },
 })
 ```
 
-The destination page must be registered in `app.json`, and its input schema
-should document the values expected in `parameters.properties`.
+When `tool` is present, `tool.name` and `tool.parameters` are required, `tool.parameters.type` must be `"object"`, and `properties` must be an object.
 
-## Required fields and failures
+## Success and failures
 
-- `messageId`, `accountId`, `message.agentId`, and `message.content` are
-  required non-empty strings.
-- `tool.name` and `tool.parameters` are required when `tool` is present.
-- `tool.parameters.type` must be `"object"` and `properties` must be an
-  object.
-- `sendNotification()` resolves with the complete server response only when
-  `code === 1` and `data.success === true`.
-- Handle `CloudIntegrationValidationError` for invalid input and
-  `CloudIntegrationError` for network, HTTP, parsing, or server-side business
-  failures. Use the response payload and UUID for diagnostics, but never log
-  the SK.
+`sendNotification()` resolves with the complete response only when `code === 1` and `data.success === true`. Invalid input throws `CloudIntegrationValidationError`; network, HTTP, parsing, and server-side business failures throw `CloudIntegrationError`. Use the response `msg` and `uuid` for diagnostics, but never log the SK or Authorization header.
 
-For the package's complete API and request details, read
-[`packages/cloud-integration/README.md`](../../packages/cloud-integration/README.md)
-when working in this repository.
+Retry only clearly transient network or server failures, keep the same `messageId` for the same attempted notification, and never retry validation failures or loop indefinitely when delivery status is unknown.
+
+For the package API, also consult [`packages/cloud-integration/README.md`](../../packages/cloud-integration/README.md) when working in this repository.

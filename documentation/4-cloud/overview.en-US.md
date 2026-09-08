@@ -1,21 +1,22 @@
 # Cloud Overview
 
-AIUI Cloud provides server-side integration capabilities that connect third-party systems with Rokid cloud services and Glasses devices. Business services, scheduled jobs, and external agents can use it to turn cloud events into information that users can receive and act on through their Glasses.
+AIUI Cloud provides server-side integration capabilities that connect third-party systems with Rokid cloud services and Glasses devices. Business services, scheduled jobs, and external agents can query account information, temporarily cache AIUI messages, or send notifications to a user's Glasses.
 
-The primary capability currently available is agent notification delivery. A third-party system can send a text notification to a specific user or open a registered AIUI page with parameters when the notification is selected.
+These capabilities must run in a trusted server environment. They are separate from the app-facing OpenAPI that AIUI pages call through the built-in `open` module. Never put an account `access_token`, Rokid account SK, or third-party token in page code, client bundles, source control, or logs.
 
-## Integration options
+## Choose a capability
 
-AIUI Cloud supports two ways to call the service:
+| Need | Interface | Documentation |
+|---|---|---|
+| Get account information for an account token | `GET /account/v1/token` | [Account token lookup](./account-token.en-US.md) |
+| Cache one message for an account and AIUI agent | `POST /metis/openApi/v1/cacheAIUIMessage` | [AIUI message cache](./message-cache.en-US.md) |
+| Send a notification or page-navigation action to a user's Glasses | `CloudIntegration.sendNotification()` or the cloud HTTP endpoint | [Sending notifications](./notifications.en-US.md) |
 
-- Use the `@yodaos-pkg/cloud-integration` npm package for a structured API in a Node.js service.
-- Call the cloud endpoint directly with HTTP or `curl` from other languages, automation scripts, or environments where installing an npm package is not suitable.
-
-Both options use the same account credentials, business fields, and cloud endpoint. The integration method does not change notification behavior on the Glasses.
+`getToken` is available only to official platform agents. A message written by `cacheAIUIMessage` is atomically retrieved and deleted by the AIUI page-side `api.agent.getAIUICacheMessage()` call. Notification delivery supports both a Node.js SDK and direct HTTP.
 
 ## Install the npm package
 
-`@yodaos-pkg/cloud-integration` requires Node.js 20 or later and uses the runtime's built-in `fetch`:
+For notification delivery, prefer `@yodaos-pkg/cloud-integration`. It requires Node.js 20 or later and uses the runtime's built-in `fetch`:
 
 ```bash
 npm install @yodaos-pkg/cloud-integration
@@ -29,18 +30,14 @@ const cloud = new CloudIntegration({
 })
 ```
 
-The SK is a sensitive credential for the account that owns the agent. Store it in a server-side environment variable or secret manager. Do not include it in AIUI page code, client bundles, source control, or logs.
+The SK is a sensitive credential for the account that owns the agent. Store it in a server-side environment variable or secret manager.
 
 ## Install the Cloud Integration Skill
 
-The `aiui-cloud-integration` Skill gives AI coding assistants integration context for npm, HTTP, `curl`, page navigation, and error handling. Add it with:
+The `aiui-cloud-integration` Skill gives AI coding assistants server-side context for account lookup, message caching, notification delivery, page navigation, and error handling:
 
 ```bash
 npx skills add https://github.com/jsar-project/AIUI/tree/main/skills/aiui-cloud-integration
 ```
 
-The Skill assists development and code generation. It does not replace the SK or send notifications automatically.
-
-## Next step
-
-See [Sending notifications](./notifications.en-US.md) for credential preparation, request fields, npm and `curl` examples, page navigation, and response handling.
+The Skill assists development and code generation. It does not replace credentials or call cloud interfaces automatically.

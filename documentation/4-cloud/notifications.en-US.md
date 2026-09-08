@@ -32,7 +32,9 @@ const response = await cloud.sendNotification({
 console.log(response.data.success)
 ```
 
-`sendNotification()` returns the complete response when the service reports `code === 1` and `data.success === true`. Invalid input throws `CloudIntegrationValidationError`. Network, HTTP, response parsing, and server-side business failures throw `CloudIntegrationError`.
+`@yodaos-pkg/cloud-integration` requires Node.js 20 or later. The constructor also accepts optional `endpoint` (to override the default URL) and `fetch` (for tests or custom runtimes).
+
+`sendNotification()` returns the complete response when the service reports `code === 1` and `data.success === true`. Invalid input throws `CloudIntegrationValidationError`. Network, HTTP, response parsing, and server-side business failures throw `CloudIntegrationError`. Retry only clearly recoverable network or temporary server failures, and reuse the same `messageId` for the same notification attempt. Do not retry validation failures or loop indefinitely when delivery status is unknown.
 
 ## Use HTTP or curl
 
