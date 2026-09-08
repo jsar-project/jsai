@@ -3,7 +3,7 @@
 
 AIUI Studio 是 Rokid 面向 Rokid Glasses 的 AIUI 智能体一站式开发构建平台，运行在浏览器中，无需安装本地开发环境。它为开发者提供从“创建 AIUI 智能体”到“提交上架”的完整链路：
 
-- 用 **AIUI CODEING** 驱动开发：用自然语言描述需求，AI 直接读写项目代码；
+- 用 **AIUI CODING** 驱动开发：用自然语言描述需求，AI 直接读写项目代码；
 - **真机模拟**：模拟智能体在眼镜上的交互流程，也可直接运行智能体；
 - **智能体调试与提审**：完成真机验证、版本生成、资料保存和提交审核。
 
@@ -19,7 +19,7 @@ AIUI Studio 是 Rokid 面向 Rokid Glasses 的 AIUI 智能体一站式开发构�
 
 | 创建方式 | 适用场景 | 结果 |
 | --- | --- | --- |
-| 对话创建 | 从零开始构建智能体 | 进入 AIUI CODEING，通过自然语言生成完整工程 |
+| 对话创建 | 从零开始构建智能体 | 进入 AIUI CODING，通过自然语言生成完整工程 |
 | 本地导入 | 本机已有 AIUI 工程 | 授权系统文件夹后导入代码 |
 | GitHub 导入 | 代码位于远程仓库 | 按仓库地址、分支或标签导入指定目录 |
 
@@ -29,7 +29,7 @@ AIUI Studio 是 Rokid 面向 Rokid Glasses 的 AIUI 智能体一站式开发构�
 
 ## 创建方式一：通过 AI Coding 创建
 
-AIUI CODEING 是主要开发界面，初次使用需要下载并启用 AIUI Studio 内置的 `aiui-dev` Skill。
+AIUI CODING 是主要开发界面，初次使用需要下载并启用 AIUI Studio 内置的 `aiui-dev` Skill。
 
 ![image.png](../../image/quickstart/1.png)
 

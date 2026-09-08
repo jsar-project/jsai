@@ -2,7 +2,7 @@
 ## I. What Is AIUI Studio?
 AIUI Studio(Global) is Rokid's **one-stop AIUI agent development and build platform** for Rokid Glasses. It runs in a browser, so no local development environment is required. It provides developers with the complete workflow from **creating an AIUI agent** to **submitting it for publication**:
 
-+ Develop with **AIUI CODEING**: describe requirements in natural language, and AI directly reads and writes project code;
++ Develop with **AIUI CODING**: describe requirements in natural language, and AI directly reads and writes project code;
 + **Real-device simulation**: simulate how an agent interacts on the glasses, or run the agent directly;
 + **Agent debugging and submission**: complete real-device verification, generate a version, save the required information, and submit it for review.
 
@@ -16,7 +16,7 @@ There are three ways to create a new AIUI agent:
 
 | Creation method | Applicable scenario | Result |
 | :---: | :---: | :---: |
-| Create with Coding | Build an agent from scratch | Enter AIUI CODEING and generate a complete project with natural language |
+| Create with Coding | Build an agent from scratch | Enter AIUI CODING and generate a complete project with natural language |
 | Import form local folder | An AIUI project already exists on your computer | Authorize the system folder and import the code |
 | Import from Github | The code is in a remote repository | Import the specified directory by repository URL, branch, or tag |
 
@@ -24,7 +24,7 @@ There are three ways to create a new AIUI agent:
 
 
 ## Method 1: Create with Coding
-AIUI CODEING is the primary development interface. The first time you use it, download and enable the built-in `aiui-dev` Skill in AIUI Studio.
+AIUI CODING is the primary development interface. The first time you use it, download and enable the built-in `aiui-dev` Skill in AIUI Studio.
 
 ![image.png](../../image/quickstart.en-us/1.png)
 
@@ -101,7 +101,7 @@ For example: “Hi Rokid, open the xxx agent.”
 ![image.png](../../image/quickstart.en-us/12.png)
 
 ## VII. View and Edit AIUI Agent Code
-Open the **“Code”** tab on the right to inspect or manually edit AIUI CODEING. The file tree supports creating, renaming, deleting, copying paths, and refreshing directories.
+Open the **“Code”** tab on the right to inspect or manually edit AIUI CODING. The file tree supports creating, renaming, deleting, copying paths, and refreshing directories.
 
 ![image.png](../../image/quickstart.en-us/13.png)
 
