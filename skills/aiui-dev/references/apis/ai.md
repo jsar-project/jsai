@@ -1,8 +1,8 @@
 # AIUI AI and Speech API Reference
 
-This file documents the verified AI and speech-related APIs available to AIUI app code.
+This file documents the verified AI and speech-related APIs available to AIUI agent code.
 
-- Common scope, entry points, and authoring rules live in [apis.md](./apis.md).
+- Common scope, entry points, and authoring rules live in [apis.md](./index.md).
 - Treat these definitions as implementation truth rather than as browser-platform guarantees.
 - Do not assume richer provider metadata, structured tool-call round trips, or broader Web Speech coverage unless it is explicitly listed here.
 
@@ -445,3 +445,67 @@ player.play();
 ### Error behavior
 
 - `start()` fails immediately with `InvalidStateError` when the owning InkView is non-interactive.
+
+## `SpeechRecognitionSession`
+
+Use this API when audio is already recorded or must arrive incrementally. The session does not open the microphone itself; capture microphone chunks with `MediaRecorder` and write them to `session.audio`.
+
+### Constructor
+
+`new SpeechRecognitionSession(options?)`
+
+| Option | Type | Behavior |
+| --- | --- | --- |
+| `lang` | `string` | Recognition language such as `zh-CN`. |
+| `interimResults` | `boolean` | Enables provisional results when supported; defaults to `false`. |
+| `maxAlternatives` | `number` | Maximum alternatives per result; minimum/default is `1`. |
+| `phrases` | `{ phrase: string, boost?: number }[]` | Custom hotwords; check capabilities first. |
+| `segmentation` | `'auto' \| 'vad' \| 'semantic'` | Requested segmentation mode; check supported modes. |
+| `audio` | `{ mimeType?, sampleRate?, channelCount?, sampleFormat? }` | Input format; `sampleFormat` is `'s16'` or `'f32'`. |
+
+The instance exposes writable stream `audio`, read-only `state`, `updateContext(messages)`, and `onstart`, `onaudiostart`, `onresult`, `onerror`, `onaudioend`, and `onend`.
+
+### `SpeechRecognitionSession.getCapabilities()`
+
+Returns a Promise for:
+
+| Field | Meaning |
+| --- | --- |
+| `audioFormats` | MIME types and supported sample rates, channel counts, and sample formats. |
+| `maxChunkBytes` | Maximum transport chunk size; larger writes are split automatically. |
+| `interimResults` | Whether provisional results are supported. |
+| `maxAlternatives` | Maximum alternatives per result. |
+| `phrases` | Whether custom hotwords are supported. |
+| `contextUpdates` | Whether initial or updated ASR context is supported. |
+| `segmentationModes` | Supported `auto`, `vad`, or `semantic` modes. |
+
+### `session.updateContext(messages)`
+
+Replaces the recognition context. Each message has non-empty `text` and role `user` or `assistant`. Check `contextUpdates`; the Promise rejects when dynamic context is unsupported or the update fails.
+
+```javascript
+const capabilities = await SpeechRecognitionSession.getCapabilities();
+const session = new SpeechRecognitionSession({
+  lang: 'zh-CN',
+  interimResults: capabilities.interimResults,
+  phrases: capabilities.phrases
+    ? [{ phrase: 'Rokid', boost: 5 }, { phrase: 'AIUI', boost: 5 }]
+    : undefined,
+});
+
+if (capabilities.contextUpdates) {
+  await session.updateContext([
+    { role: 'user', text: 'I am asking about Rokid products.' },
+  ]);
+}
+
+session.onresult = (event) => {
+  console.log(event.results[event.resultIndex][0].transcript);
+};
+
+const writer = session.audio.getWriter();
+await writer.write(audioBlob);
+await writer.close();
+```
+
+For live microphone input, choose a MIME type supported by both `MediaRecorder.isTypeSupported()` and `capabilities.audioFormats`, serialize `dataavailable` writes through one Promise chain, wait for all writes, then close the writer and stop microphone tracks.

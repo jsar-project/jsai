@@ -1,6 +1,6 @@
 # AIUI WXSS Reference
 
-This file documents the currently confirmed WXSS and CSS support surface for AIUI applications.
+This file documents the currently confirmed WXSS and CSS support surface for AIUI agents.
 
 - Treat this file as the source of truth for selector and property support when generating styles.
 - Only use selectors and properties that are explicitly listed here.

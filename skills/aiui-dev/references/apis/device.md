@@ -1,11 +1,11 @@
 # AIUI Device API Reference
 
-This file documents the verified device and sensor APIs available to AIUI app code.
+This file documents the verified device and sensor APIs available to AIUI agent code.
 
-- Common scope, entry points, and authoring rules live in [apis.md](./apis.md).
+- Common scope, entry points, and authoring rules live in [apis.md](./index.md).
 - Interactive-gate behavior and host capability limits are part of the current implementation surface.
 - Do not assume browser-complete Bluetooth or Generic Sensor semantics beyond what is documented here.
-- Page-scoped environment awareness callbacks such as `onHeadGesture(event)` live on the page object and are summarized in [SKILL.md](./SKILL.md).
+- Page-scoped environment awareness callbacks such as `onHeadGesture(event)` live on the page object and are summarized in [SKILL.md](../events.md).
 
 ## `navigator.bluetooth`
 
@@ -226,6 +226,58 @@ Readonly boolean properties:
 - The first successful reading flips `activated` to `true` and `hasReading` to `true`.
 - `stop()` sets `activated` back to `false` but keeps the last successful reading cached.
 - `stop()` is a no-op when the instance is already idle.
+
+## `navigator.bluetoothPeripheral`
+
+This optional API is available only inside an Agent Worker that declares `"capabilities": ["bluetooth-peripheral"]`. The Worker must use `lifetime: "foreground"`. It lets nearby BLE devices discover and interact with services provided by the agent.
+
+### `openGattServer(options)`
+
+Returns `Promise<BluetoothLocalGATTServer>`. `options.services` declares the complete service and characteristic structure. Each characteristic has a UUID and properties such as `read`, `write`, and `notify`.
+
+```javascript
+const serviceUuid = '12345678-1234-5678-1234-56789abcdef0';
+const valueUuid = '12345678-1234-5678-1234-56789abcdef1';
+
+const server = await navigator.bluetoothPeripheral.openGattServer({
+  services: [{
+    uuid: serviceUuid,
+    characteristics: [{
+      uuid: valueUuid,
+      properties: { read: true, write: true, notify: true },
+    }],
+  }],
+});
+
+const value = server.getService(serviceUuid).getCharacteristic(valueUuid);
+value.addEventListener('readrequest', (event) => {
+  event.respondWith(new Uint8Array([1]));
+});
+value.addEventListener('writerequest', (event) => {
+  console.log(event.value);
+  event.respondWith();
+});
+
+await server.startAdvertising({
+  name: 'AIUI Sensor',
+  serviceUUIDs: [serviceUuid],
+});
+```
+
+### Server and characteristic methods
+
+| API | Behavior |
+| --- | --- |
+| `server.startAdvertising(options?)` | Starts BLE advertising. |
+| `server.stopAdvertising()` | Stops advertising. |
+| `server.getService(uuid)` | Returns a configured local service. |
+| `service.getCharacteristic(uuid)` | Returns a configured characteristic. |
+| `characteristic.updateValue(value, options?)` | Updates the value and notifies subscribed devices when applicable. |
+| `server.close()` | Stops and releases the server. |
+
+Characteristic events are `readrequest`, `writerequest`, `subscribe`, and `unsubscribe`. Respond to read requests with `event.respondWith(value)`; read written bytes from `event.value` and complete writes with `event.respondWith()`.
+
+The service structure is fixed after `openGattServer()` succeeds. Close and recreate the server to change it. Stop advertising and close it during Worker cleanup.
 
 ## `AbsoluteOrientationSensor`
 

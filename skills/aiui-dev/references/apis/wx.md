@@ -1,8 +1,8 @@
 # AIUI wx API Reference
 
-This file documents the verified `wx` module surface and related task or media objects available to AIUI app code.
+This file documents the verified `wx` module surface and related task or media objects available to AIUI agent code.
 
-- Common scope, entry points, and authoring rules live in [apis.md](./apis.md).
+- Common scope, entry points, and authoring rules live in [apis.md](./index.md).
 - Treat these definitions as implementation truth.
 - Do not assume unlisted WeChat-compatible overloads or return shapes.
 
@@ -34,7 +34,7 @@ Error behavior:
 
 Behavior notes:
 
-- `exitMiniProgram(options?)` calls `success()` and `complete()` when present, then sends the app exit event.
+- `exitMiniProgram(options?)` calls `success()` and `complete()` when present, then sends the agent exit event.
 
 ### UI methods
 
@@ -134,7 +134,7 @@ Behavior notes:
 
 - `request(options)` uses `GET` when `method` is omitted.
 - `request(options)` uses `'arraybuffer'` when `responseType` is omitted.
-- `request(options)` resolves timeout in this order: `options.timeout`, app config timeout, then `60000`.
+- `request(options)` resolves timeout in this order: `options.timeout`, `app.json` timeout, then `60000`.
 - `request(options)` accepts request data from `data` or fallback `body`.
 - When `data` is an object and `content-type` contains `application/x-www-form-urlencoded`, the body is URL-encoded.
 - Otherwise object `data` is serialized with `JSON.stringify`.
@@ -190,7 +190,7 @@ Return behavior:
 Behavior notes:
 
 - These methods return `undefined` when the current context does not provide the required media capability.
-- These methods may return `undefined` in unsupported app lifecycle modes.
+- These methods may return `undefined` in unsupported agent lifecycle modes.
 - `getRecorderManager()` also returns `undefined` when recording capability is unavailable.
 
 ## `RequestTask`

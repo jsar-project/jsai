@@ -1,8 +1,8 @@
 # AIUI Web Networking and Encoding API Reference
 
-This file documents the currently verified browser-style networking and text decoding APIs available to AIUI app code.
+This file documents the currently verified browser-style networking and text decoding APIs available to AIUI agent code.
 
-- Common scope, entry points, and authoring rules live in [apis.md](./apis.md).
+- Common scope, entry points, and authoring rules live in [apis.md](./index.md).
 - Treat this file as the implementation-aligned reference for streamed HTTPS consumption and incremental text decoding.
 
 ## `fetch(url, options?)`
@@ -131,6 +131,92 @@ while (true) {
 
 text += decoder.decode();
 console.log(text);
+```
+
+## `WebSocket`
+
+Create a connection with `new WebSocket(url, protocols?)`. Important members are `url`, `readyState`, `protocol`, `extensions`, `bufferedAmount`, `binaryType`, `send(data)`, and `close(code?, reason?)`.
+
+Handle `open`, `message`, `error`, and `close` through event listeners or `onopen`, `onmessage`, `onerror`, and `onclose`. A message event exposes `data`; close events expose `code`, `reason`, and `wasClean`.
+
+```javascript
+const socket = new WebSocket('wss://example.com/events');
+socket.addEventListener('open', () => socket.send('ready'));
+socket.addEventListener('message', (event) => console.log(event.data));
+socket.addEventListener('close', (event) => {
+  console.log(event.code, event.reason, event.wasClean);
+});
+```
+
+Close the socket when its owning Page, Widget, or task no longer needs it.
+
+## `File` and `FormData`
+
+`new File(parts, name, options?)` creates a Blob with `name`, `lastModified`, `size`, and `type`. `FormData` supports `append()`, `set()`, `get()`, `getAll()`, `has()`, `delete()`, and iteration.
+
+```javascript
+const attachment = new File(['AIUI'], 'note.txt', { type: 'text/plain' });
+const form = new FormData();
+form.append('attachment', attachment);
+form.append('category', 'example');
+await fetch('/api/upload', { method: 'POST', body: form });
+```
+
+Do not manually set a multipart boundary when passing `FormData` as the request body.
+
+## `URL` and `URLSearchParams`
+
+Use `new URL(input, base?)` to parse or resolve URLs. Read or update `protocol`, `host`, `hostname`, `port`, `pathname`, `search`, `hash`, `origin`, and `searchParams`.
+
+`URLSearchParams` supports construction from a query string, records, or pairs plus `append()`, `set()`, `get()`, `getAll()`, `has()`, `delete()`, `sort()`, iteration, and `toString()`.
+
+```javascript
+const url = new URL('/weather', 'https://example.com');
+url.searchParams.set('city', 'Hangzhou');
+console.log(url.href);
+```
+
+## Text Encoding
+
+- `new TextEncoder().encode(text)` returns UTF-8 bytes.
+- `TextEncoder.encodeInto(source, destination)` writes into an existing buffer.
+- `TextDecoder.decode(input?, { stream? })` decodes bytes; use streaming mode across chunk boundaries and finish with an empty `decode()`.
+
+## Web Crypto
+
+### `crypto`
+
+- `crypto.randomUUID(): string`
+- `crypto.getRandomValues(typedArray): typedArray`
+- `crypto.subtle.digest(algorithm, data): Promise<ArrayBuffer>`
+- `crypto.subtle.importKey(format, keyData, algorithm, extractable, keyUsages): Promise<CryptoKey>`
+- `crypto.subtle.sign(algorithm, key, data): Promise<ArrayBuffer>`
+
+`getRandomValues()` accepts integer typed arrays and limits one request to 65,536 bytes. Do not use ordinary random-number generators for security tokens.
+
+```javascript
+const bytes = new Uint8Array(16);
+crypto.getRandomValues(bytes);
+const digest = await crypto.subtle.digest(
+  'SHA-256',
+  new TextEncoder().encode('AIUI'),
+);
+```
+
+## User Timing
+
+Use `performance.now()` for monotonic elapsed time. User Timing provides marks and measures:
+
+```javascript
+performance.mark('render-start');
+// Perform the operation.
+performance.mark('render-end');
+performance.measure('render', 'render-start', 'render-end');
+
+const [entry] = performance.getEntriesByName('render', 'measure');
+console.log(entry.duration);
+performance.clearMarks();
+performance.clearMeasures();
 ```
 
 ## Authoring Rules For Agents
