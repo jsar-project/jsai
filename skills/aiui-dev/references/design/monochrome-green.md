@@ -280,7 +280,7 @@ components:
 
 This specification defines the visual language for Rokid AIUI on **RokidGlasses1 / RokidGlasses2**, using the **480 × 352 px** single-green transparent display.
 
-The hardware constraint remains fundamental: the display exposes one luminous green channel over a transparent black floor. The new visual direction treats that constraint as a **luminance, line, and whitespace system**. Interfaces should feel precise, lightweight, technical, and spatial — closer to a scientific instrument or mission-control overlay than a stack of conventional application cards.
+The hardware constraint remains fundamental: the display exposes one luminous green channel over a transparent black floor. The new visual direction treats that constraint as a **luminance, line, and whitespace system**. Interfaces should feel precise, lightweight, technical, and spatial — closer to a scientific instrument or mission-control overlay than a stack of conventional UI cards.
 
 The visual system is built from four primitives:
 
@@ -293,7 +293,7 @@ Large opaque surfaces, thick borders, repeated rounded cards, and decorative glo
 
 ## 1. Design Principles
 
-### 1.1 Instrument, not app chrome
+### 1.1 Instrument, not conventional UI chrome
 
 AIUI is an information overlay inside the user's visual field. The interface should expose state, relationships, and actions with the minimum amount of chrome required to understand them.
 

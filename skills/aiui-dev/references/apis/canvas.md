@@ -1,8 +1,8 @@
 # AIUI Canvas and Barcode API Reference
 
-This file documents the verified Canvas and barcode APIs available to AIUI app code.
+This file documents the verified Canvas and barcode APIs available to AIUI agent code.
 
-- Common scope, entry points, and authoring rules live in [apis.md](./apis.md).
+- Common scope, entry points, and authoring rules live in [apis.md](./index.md).
 - Do not infer standard Web API behavior unless it is explicitly listed here or in the index file.
 - Do not add browser-compatible overloads or semantics that are not present in the source.
 
