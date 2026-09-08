@@ -2,14 +2,51 @@
 
 This reference is aligned with the current registered component list in `ink/packages/ink-builtin-components/src/lib.rs` and is meant to reflect the implementation that AIUI agents can rely on today.
 
+## Component List
+
+Choose a component by the job it performs, then read its detailed contract before generating attributes, events, or method calls.
+
+### Basic Content and Layout
+
+| Component | Use |
+| --- | --- |
+| [`<view>`](#view) | General-purpose layout container. |
+| [`<text>`](#text) | Text and bound text values. |
+| [`<image>`](#image) | Local or remote images with scaling modes. |
+
+### Interaction and Scrolling
+
+| Component | Use |
+| --- | --- |
+| [`<button>`](#button) | Focusable action with tap and keyboard activation. |
+| [`<scroll-view>`](#scroll-view) | Scrollable content, position control, and scroll events. |
+
+### Graphics, Animation, and Data Display
+
+| Component | Use |
+| --- | --- |
+| [`<canvas>`](#canvas) | Custom 2D drawing and pixel operations. |
+| [`<card>`](#card) | Structured card-style content. |
+| [`<chart>`](#chart) | Line or area data visualization. |
+| [`<lottie-view>`](#lottie-view) | Lottie vector animation playback. |
+| [`<error-state>`](#error-state) | Standard empty or error feedback. |
+
+### AI-generated UI
+
+| Component | Use |
+| --- | --- |
+| [`<a2ui>`](#a2ui) | Renders an A2UI command stream into a surface. |
+
+### Compatibility Aliases
+
+`<swiper>`, `<swiper-item>`, and `<fragment>` are registered tags, but currently use the `<view>` implementation. Treat them as layout containers rather than assuming complete WeChat swiper behavior. The internal `#text` registration is not an authorable component.
+
 ## Common Runtime Rules
 
 - Most components support standard WXML attributes such as `id`, `class`, and inline `style`.
 - Tap handlers such as `bindtap` and `catchtap` are handled by the framework layer on `TouchEnd` / `MouseUp`, not by each component individually.
 - Layout, size, spacing, borders, colors, and flex behavior are primarily controlled through WXSS rather than many component-specific props.
-- Some tags are currently aliases of other components:
-  - `swiper`, `swiper-item`, and `fragment` are currently backed by the `view` implementation.
-- The internal `#text` registration is runtime-only and is not meant to be authored directly in page templates.
+- Compatibility aliases and the internal `#text` registration are summarized in the component list above.
 
 ## Component Reference
 
