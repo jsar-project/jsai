@@ -91,14 +91,22 @@ export default {
 
 ### `onVoiceWakeup(Object event)`
 
-语音唤醒时触发，对应页面级 `voicewakeup` 事件。可以通过 `event.keyword` 获取命中的唤醒词。部分宿主可能会为语音唤醒提供默认处理，是否支持拦截以及拦截方式以宿主实现为准。默认情况下，`event.keyword` 的值为 `leqi`。
+语音唤醒或触控唤醒时触发，对应页面级 `voicewakeup` 事件。
+
+- **推荐用法**：默认**无需校验 `event.keyword`**，只要事件触发即直接响应并启动语音交互。
+- **按需区分**：若需区分特定唤醒词或触控唤醒，可通过 `event.keyword` 判断。常见取值包括语音唤醒词（`'乐奇'`、`'Hi Rokid'`）以及触控唤醒事件（如 `'clickAiAssist'`）。
+- 若需拦截宿主默认行为，可调用 `event.preventDefault()`。
 
 ```javascript
 export default {
   onVoiceWakeup(event) {
-    if (event.keyword === 'leqi') {
-      this.setData({ status: 'voice wakeup received' });
-    }
+    event.preventDefault();
+    // 默认推荐直接响应，无需过滤 keyword
+    this.setData({ status: 'voice wakeup received' });
+
+    // 如需按唤醒来源特殊区分：
+    // if (event.keyword === 'clickAiAssist') { /* 触控唤醒 */ }
+    // if (event.keyword === '乐奇' || event.keyword === 'Hi Rokid') { /* 语音唤醒 */ }
   }
 }
 ```
@@ -224,9 +232,9 @@ export default {
   },
 
   onVoiceWakeup(event) {
-    if (event.keyword === 'leqi') {
-      this.setData({ status: 'voice wakeup received' });
-    }
+    event.preventDefault();
+    // 默认推荐直接放行并响应唤醒
+    this.setData({ status: 'voice wakeup received' });
   }
 }
 ```

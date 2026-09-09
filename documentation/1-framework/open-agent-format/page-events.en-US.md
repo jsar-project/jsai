@@ -91,14 +91,22 @@ By default, some keys in `keyup` have built-in behavior:
 
 ### `onVoiceWakeup(Object event)`
 
-Triggered when voice wakeup occurs, corresponding to the page-level `voicewakeup` event. You can get the matched wake word through `event.keyword`. Some hosts may provide default handling for voice wakeup. Whether interception is supported and how it works depend on the host implementation. By default, `event.keyword` is `leqi`.
+Triggered when voice wakeup or touch wakeup occurs, corresponding to the page-level `voicewakeup` event.
+
+- **Recommended usage**: It is **not necessary to check `event.keyword`** by default; simply respond and start voice interaction whenever the event fires.
+- **Conditional handling**: If you need to distinguish specific wake words or touch wakeup events, inspect `event.keyword`. Common values include voice wake words (`'乐奇'`, `'Hi Rokid'`) and touch wakeup events (such as `'clickAiAssist'`).
+- To intercept the host's default behavior, call `event.preventDefault()`.
 
 ```javascript
 export default {
   onVoiceWakeup(event) {
-    if (event.keyword === 'leqi') {
-      this.setData({ status: 'voice wakeup received' });
-    }
+    event.preventDefault();
+    // Recommended: respond directly without filtering keyword
+    this.setData({ status: 'voice wakeup received' });
+
+    // If you need to distinguish by wakeup source:
+    // if (event.keyword === 'clickAiAssist') { /* Touch wakeup */ }
+    // if (event.keyword === '乐奇' || event.keyword === 'Hi Rokid') { /* Voice wakeup */ }
   }
 }
 ```
@@ -224,9 +232,9 @@ export default {
   },
 
   onVoiceWakeup(event) {
-    if (event.keyword === 'leqi') {
-      this.setData({ status: 'voice wakeup received' });
-    }
+    event.preventDefault();
+    // Recommended: respond directly to wakeup
+    this.setData({ status: 'voice wakeup received' });
   }
 }
 ```
