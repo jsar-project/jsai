@@ -100,9 +100,7 @@ export default {
 ```javascript
 export default {
   onVoiceWakeup(event) {
-    if (typeof event.preventDefault === 'function') {
-      event.preventDefault();
-    }
+    event.preventDefault();
     // 默认推荐直接响应，无需过滤 keyword
     this.setData({ status: 'voice wakeup received' });
 
@@ -234,9 +232,7 @@ export default {
   },
 
   onVoiceWakeup(event) {
-    if (typeof event.preventDefault === 'function') {
-      event.preventDefault();
-    }
+    event.preventDefault();
     // 默认推荐直接放行并响应唤醒
     this.setData({ status: 'voice wakeup received' });
   }

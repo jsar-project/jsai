@@ -100,9 +100,7 @@ Triggered when voice wakeup or touch wakeup occurs, corresponding to the page-le
 ```javascript
 export default {
   onVoiceWakeup(event) {
-    if (typeof event.preventDefault === 'function') {
-      event.preventDefault();
-    }
+    event.preventDefault();
     // Recommended: respond directly without filtering keyword
     this.setData({ status: 'voice wakeup received' });
 
@@ -234,9 +232,7 @@ export default {
   },
 
   onVoiceWakeup(event) {
-    if (typeof event.preventDefault === 'function') {
-      event.preventDefault();
-    }
+    event.preventDefault();
     // Recommended: respond directly to wakeup
     this.setData({ status: 'voice wakeup received' });
   }
